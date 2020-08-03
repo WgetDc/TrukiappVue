@@ -1,17 +1,114 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width,initial-scale=1.0">
-    <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title><%= htmlWebpackPlugin.options.title %></title>
-  </head>
-  <body>
-    <noscript>
-      <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
-    </noscript>
-    <div id="app"></div>
-    <!-- built files will be auto injected -->
-  </body>
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <link rel="icon" href="<%= BASE_URL %>favicon.ico">
+  <title><%= htmlWebpackPlugin.options.title %></title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@latest/css/materialdesignicons.min.css">
+
+  <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
+
+  <!-- HTML2Canvas   -->
+  <script type="text/javascript" src="js/html2canvas.js"></script>
+  <!--  Konva Drag and drop   -->
+  <script src="https://unpkg.com/konva@7.0.4/konva.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"
+    integrity="sha384-NaWTHo/8YCBYJ59830LTz/P4aQZK1sS0SneOgAvhsIl3zBu8r9RevNg5lHCHAuQ/"
+    crossorigin="anonymous"></script>
+
+  
+</head>
+
+<body>
+  <noscript>
+    <strong>We're sorry but <%= htmlWebpackPlugin.options.title %> doesn't work properly without JavaScript enabled.
+      Please enable it to continue.</strong>
+  </noscript>
+  <div id="app"></div>
+  <!-- built files will be auto injected -->
+</body>
+
+<script>
+  var width = window.innerWidth;
+    var height = window.innerHeight;
+
+    var stage = new Konva.Stage({
+      container: 'container',
+      width: 1245,
+      height: height,
+    });
+    var layer = new Konva.Layer();
+    stage.add(layer);
+
+    // what is url of dragging element?
+    var itemURL = '';
+    document
+      .getElementById('drag-items')
+      .addEventListener('dragstart', function (e) {
+        itemURL = e.target.src;
+      });
+
+    var con = stage.container();
+    con.addEventListener('dragover', function (e) {
+      e.preventDefault(); // !important
+    });
+
+    con.addEventListener('drop', function (e) {
+      e.preventDefault();
+      // now we need to find pointer position
+      // we can't use stage.getPointerPosition() here, because that event
+      // is not registered by Konva.Stage
+      // we can register it manually:
+      stage.setPointersPositions(e);
+
+      Konva.Image.fromURL(itemURL, function (image) {
+        layer.add(image);
+
+        image.position(stage.getPointerPosition());
+        image.draggable(true);
+
+        layer.draw();
+      });
+    });
+
+   
+
+
+
+        //Guardar a PDF
+        document.getElementById('save').addEventListener('click', function () {
+          var pdf = new jsPDF('l', 'px', [stage.width(), stage.height()]);
+          pdf.setTextColor('#000000');
+          // first add texts
+          stage.find('Text').forEach((text) => {
+            const size = text.fontSize() / 0.75; // convert pixels to points
+            pdf.setFontSize(size);
+            pdf.text(text.text(), text.x(), text.y(), {
+              baseline: 'top',
+              angle: -text.getAbsoluteRotation(),
+            });
+          });
+  
+          // then put image on top of texts (so texts are not visible)
+          pdf.addImage(
+            stage.toDataURL({ pixelRatio: 2 }),
+            0,
+            0,
+            stage.width(),
+            stage.height()
+          );
+  
+          pdf.save('canvas.pdf');
+        });
+
+
+       //undoo
+
+</script>
+
 </html>
