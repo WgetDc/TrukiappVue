@@ -3,6 +3,13 @@
     <v-app id="inspire">
       <v-main>
         <div class="margenes grey lighten-5">
+          <v-alert
+      border="left"
+      color="indigo"
+      dark
+    >
+      Bienvenido {{usuario[0].name}}
+    </v-alert>
           <v-row no-gutters>
             <v-col class="pa-2" cols="6" md="4">
               <v-card class=""  id="drag-items">
@@ -69,6 +76,7 @@
 </template>
 
 <script>
+import axios from "axios";
 import Vue from 'vue';
 import html2canvas from 'html2canvas';
  
@@ -76,6 +84,15 @@ Vue.use(html2canvas);
 
 
 export default {
+  data: () => ({
+    usuario: null
+  }),
+  created() {
+    axios.get("http://127.0.0.1/api/usuarios/18801399-6").then((result) => {
+      this.usuario = result.data;
+      console.log(result)
+    })
+  },
   methods: {
     tomarFoto(){
       console.log("Funciono")
